@@ -1,0 +1,21 @@
+name: track-aur
+
+on:
+  schedule:
+    - cron: '23 3 * * *'
+  workflow_dispatch:
+
+permissions:
+  actions: write
+  contents: write
+  pull-requests: write
+
+jobs:
+  track:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Propose the newest AUR revision
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: ci/track-aur.sh

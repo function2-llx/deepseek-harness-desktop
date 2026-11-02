@@ -1,0 +1,31 @@
+name: build
+
+on:
+  push:
+    branches: [main]
+    paths: [aur-commit]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Build the pinned AUR revision
+        run: docker run --rm --volume "$PWD:/work" archlinux:base-devel bash /work/ci/build.sh "$(cat aur-commit)" /work/out
+      - name: Report disk space
+        if: always()
+        run: df -h /
+      - uses: actions/upload-artifact@v7
+        with:
+          name: package
+          path: out/*.pkg.tar.zst
+          retention-days: 7
+      - name: Publish a release
+        if: github.ref == 'refs/heads/main'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: ci/release.sh out "$(cat aur-commit)"
