@@ -1,5 +1,7 @@
 # deepseek-harness-desktop builds
 
+English | [简体中文](README.zh-Hans.md)
+
 Unofficial Arch Linux packages of the [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) desktop app, built on GitHub Actions from the AUR package [deepseek-harness-desktop](https://aur.archlinux.org/packages/deepseek-harness-desktop).
 Upstream publishes desktop builds for macOS and Windows only; the AUR package, maintained by HarryLoong, adds the Linux build, and this repository runs it unchanged.
 

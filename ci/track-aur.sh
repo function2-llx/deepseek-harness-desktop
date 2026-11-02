@@ -19,7 +19,7 @@ fi
 
 git switch --create "$branch"
 echo "$newest" > aur-commit
-title="跟踪 AUR 提交 ${newest:0:12}"
+title="Track AUR commit ${newest:0:12}"
 git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' \
   commit --all --message "$title"
 git push origin "$branch"
