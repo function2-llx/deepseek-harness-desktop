@@ -14,5 +14,5 @@ upstream=$(field source | sed -n 's/.*#tag=//p')
 
 gh release create "$version" "$output"/*.pkg.tar.zst \
   --target "$GITHUB_SHA" \
-  --title "deepseek-harness-desktop $version" \
+  --title "$version" \
   --notes "Built from AUR commit [${commit:0:12}](https://github.com/archlinux/aur/commit/$commit), upstream tag \`$upstream\`."
