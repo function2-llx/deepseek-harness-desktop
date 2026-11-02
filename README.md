@@ -7,11 +7,26 @@
 
 ## 安装
 
-从[最新 release](https://github.com/function2-llx/deepseek-harness-desktop/releases/latest) 下载 `.pkg.tar.zst` 文件，然后安装：
+安装最新版本：
 
 ```sh
-sudo pacman -U deepseek-harness-desktop-*-x86_64.pkg.tar.zst
+bash <(curl -fsSL https://raw.githubusercontent.com/function2-llx/deepseek-harness-desktop/main/install.sh)
 ```
+
+安装指定版本时，把 [release](https://github.com/function2-llx/deepseek-harness-desktop/releases) 的标签作为参数传入：
+
+```sh
+bash <(curl -fsSL https://raw.githubusercontent.com/function2-llx/deepseek-harness-desktop/main/install.sh) 0.2.2alpha.2-1
+```
+
+[install.sh](install.sh) 把软件包下载到临时目录，用 `sudo pacman -U` 安装，最后删除临时目录。
+软件包没有签名，而 Arch 默认的 `pacman.conf` 要求通过 URL 安装的软件包带签名，所以脚本先下载到本地再安装。
+用 `bash <(...)` 运行脚本时，pacman 的确认提示从终端读取回答；`curl ... | bash` 会让它从管道读取。
+
+### 与 paru 等 AUR helper 共存
+
+这样安装的软件包不属于任何 pacman 仓库，`paru -Syu` 会把它与同名 AUR 包比较，在 AUR 版本更新后提议从源码构建。
+只想使用这里的预编译包时，在 `/etc/pacman.conf` 的 `IgnorePkg` 中加入 `deepseek-harness-desktop`，之后重新运行安装脚本来更新。
 
 ## 构建流程
 
