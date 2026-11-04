@@ -7,6 +7,28 @@
 
 ## 安装
 
+### 通过 pacman 仓库（推荐）
+
+在 `/etc/pacman.conf` 末尾加入：
+
+```ini
+[deepseek-harness-desktop]
+SigLevel = Optional TrustAll
+Server = https://github.com/function2-llx/deepseek-harness-desktop/releases/download/$arch
+```
+
+然后安装：
+
+```sh
+sudo pacman -Syu deepseek-harness-desktop
+```
+
+之后 `pacman -Syu` 和 `paru -Syu` 都从这个仓库获取更新。
+仓库里的软件包没有签名，`SigLevel = Optional TrustAll` 只对这个仓库接受未签名的软件包。
+仓库就是标签为 `x86_64` 的 release，其中只保留最新版本；旧版本的软件包在各自版本的 release 里。
+
+### 通过安装脚本
+
 安装最新版本：
 
 ```sh
@@ -25,12 +47,14 @@ bash <(curl -fsSL https://raw.githubusercontent.com/function2-llx/deepseek-harne
 
 ### 与 paru 等 AUR helper 共存
 
-这样安装的软件包不属于任何 pacman 仓库，`paru -Syu` 会把它与同名 AUR 包比较，在 AUR 版本更新后提议从源码构建。
-只想使用这里的预编译包时，在 `/etc/pacman.conf` 的 `IgnorePkg` 中加入 `deepseek-harness-desktop`，之后重新运行安装脚本来更新。
+paru 只把不属于任何 pacman 仓库的已安装软件包与 AUR 比较。
+通过 pacman 仓库安装时，`paru -Syu` 从仓库更新这个软件包，不会提议从 AUR 构建。
+通过安装脚本安装时，`paru -Syu` 会把它与同名 AUR 包比较，在 AUR 版本更新后提议从源码构建；添加上面的 pacman 仓库即可避免。
 
 ## 构建流程
 
 - [aur-commit](aur-commit) 锁定 AUR 包的某个提交，该提交取自 [AUR 的 GitHub 镜像](https://github.com/archlinux/aur/tree/deepseek-harness-desktop)。
 - [ci/build.sh](ci/build.sh) 在 `archlinux:base-devel` 容器中对该提交运行 `makepkg`。
-- 推送到 `main` 的提交若修改了 `aur-commit`，就会构建软件包，并以 `pkgver-pkgrel` 为标签发布 release。
+- 推送到 `main` 的提交若修改了 `aur-commit`，就会构建软件包，以 `pkgver-pkgrel` 为标签发布 release，并用 [ci/publish-repo.sh](ci/publish-repo.sh) 把 pacman 仓库更新到这个版本。
 - 每日运行的工作流发现 AUR 包有新提交时，会开一个 pull request 并构建该分支；合并该 pull request 即发布新 release。
+- 手动运行 [publish-repo](.github/workflows/publish-repo.yml) 工作流，可以把 pacman 仓库指向任意一个已发布的版本。

@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Publish the package that ci/build.sh left in <output-dir> as a GitHub release tagged pkgver-pkgrel.
+# Publish the package that ci/build.sh left in <output-dir> as a GitHub release tagged pkgver-pkgrel,
+# then point the pacman repository at it.
 # Usage: release.sh <output-dir> <aur-commit>
 set -euo pipefail
 
@@ -13,6 +14,9 @@ version="$(field pkgver)-$(field pkgrel)"
 upstream=$(field source | sed -n 's/.*#tag=//p')
 
 gh release create "$version" "$output"/*.pkg.tar.zst \
+  --latest \
   --target "$GITHUB_SHA" \
   --title "$version" \
   --notes "Built from AUR commit [${commit:0:12}](https://github.com/archlinux/aur/commit/$commit), upstream tag \`$upstream\`."
+
+"$(dirname "$0")/publish-repo.sh" "$version"

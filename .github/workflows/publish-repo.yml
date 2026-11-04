@@ -1,0 +1,22 @@
+name: publish-repo
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Release tag whose package the pacman repository serves
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Point the pacman repository at the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ inputs.version }}
+        run: ci/publish-repo.sh "$VERSION"
