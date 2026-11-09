@@ -7,7 +7,29 @@
 
 ## 安装
 
-### 通过 pacman 仓库（推荐）
+### 安装脚本（推荐）
+
+```sh
+bash <(curl -fsSL https://raw.githubusercontent.com/function2-llx/deepseek-harness-desktop/main/install.sh)
+```
+
+[install.sh](install.sh) 下载最新版本的软件包，用 `sudo pacman -U` 安装，最后删除下载的文件。
+如果 `/etc/pacman.conf` 里还没有本项目的 pacman 仓库，脚本会先显示要加入的配置并询问是否加入（默认加入）；加入后，`pacman -Syu` 和 `paru -Syu` 都会从这个仓库获取更新。
+脚本用 `pacman -U` 安装，不会顺带升级系统里的其他软件包。
+
+安装指定版本时，把 [release](https://github.com/function2-llx/deepseek-harness-desktop/releases) 的标签作为参数传入：
+
+```sh
+bash <(curl -fsSL https://raw.githubusercontent.com/function2-llx/deepseek-harness-desktop/main/install.sh) 0.2.2alpha.2-1
+```
+
+pacman 仓库只提供最新版本，所以指定版本时脚本不会询问是否加入仓库。
+如果已经加入了仓库，下一次 `pacman -Syu` 会把指定的版本升级到最新版，除非在 `/etc/pacman.conf` 的 `IgnorePkg` 中加入 `deepseek-harness-desktop`。
+
+软件包没有签名，而 Arch 默认的 `pacman.conf` 要求通过 URL 安装的软件包带签名，所以脚本先下载到本地再安装。
+请用 `bash <(...)` 运行脚本：`curl ... | bash` 会让 pacman 的确认提示从管道而不是终端读取回答。
+
+### 手动添加 pacman 仓库
 
 在 `/etc/pacman.conf` 末尾加入：
 
@@ -23,33 +45,14 @@ Server = https://github.com/function2-llx/deepseek-harness-desktop/releases/down
 sudo pacman -Syu deepseek-harness-desktop
 ```
 
-之后 `pacman -Syu` 和 `paru -Syu` 都从这个仓库获取更新。
 仓库里的软件包没有签名，`SigLevel = Optional TrustAll` 只对这个仓库接受未签名的软件包。
 仓库就是标签为 `x86_64` 的 release，其中只保留最新版本；旧版本的软件包在各自版本的 release 里。
-
-### 通过安装脚本
-
-安装最新版本：
-
-```sh
-bash <(curl -fsSL https://raw.githubusercontent.com/function2-llx/deepseek-harness-desktop/main/install.sh)
-```
-
-安装指定版本时，把 [release](https://github.com/function2-llx/deepseek-harness-desktop/releases) 的标签作为参数传入：
-
-```sh
-bash <(curl -fsSL https://raw.githubusercontent.com/function2-llx/deepseek-harness-desktop/main/install.sh) 0.2.2alpha.2-1
-```
-
-[install.sh](install.sh) 把软件包下载到临时目录，用 `sudo pacman -U` 安装，最后删除临时目录。
-软件包没有签名，而 Arch 默认的 `pacman.conf` 要求通过 URL 安装的软件包带签名，所以脚本先下载到本地再安装。
-用 `bash <(...)` 运行脚本时，pacman 的确认提示从终端读取回答；`curl ... | bash` 会让它从管道读取。
 
 ### 与 paru 等 AUR helper 共存
 
 paru 只把不属于任何 pacman 仓库的已安装软件包与 AUR 比较。
-通过 pacman 仓库安装时，`paru -Syu` 从仓库更新这个软件包，不会提议从 AUR 构建。
-通过安装脚本安装时，`paru -Syu` 会把它与同名 AUR 包比较，在 AUR 版本更新后提议从源码构建；添加上面的 pacman 仓库即可避免。
+加入 pacman 仓库后，`paru -Syu` 从仓库更新这个软件包，不会提议从 AUR 构建。
+没有加入仓库时，`paru -Syu` 会把它与同名 AUR 包比较，在 AUR 版本更新后提议从源码构建；重新运行安装脚本并同意加入仓库，或按上一节手动加入，即可避免。
 
 ## 构建流程
 

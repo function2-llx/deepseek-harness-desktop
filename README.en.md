@@ -7,7 +7,29 @@ Upstream publishes desktop builds for macOS and Windows only; the AUR package, m
 
 ## Installation
 
-### Via the pacman repository (recommended)
+### Installation script (recommended)
+
+```sh
+bash <(curl -fsSL https://raw.githubusercontent.com/function2-llx/deepseek-harness-desktop/main/install.sh)
+```
+
+[install.sh](install.sh) downloads the latest version of the package, installs it with `sudo pacman -U`, and finally deletes the downloaded file.
+If this project's pacman repository is not already in `/etc/pacman.conf`, the script first shows the configuration to be added and asks whether to add it (default is to add it); once added, both `pacman -Syu` and `paru -Syu` will fetch updates from this repository.
+The script installs with `pacman -U`, so it does not upgrade other packages on the system along the way.
+
+To install a specific version, pass the tag from [release](https://github.com/function2-llx/deepseek-harness-desktop/releases) as an argument:
+
+```sh
+bash <(curl -fsSL https://raw.githubusercontent.com/function2-llx/deepseek-harness-desktop/main/install.sh) 0.2.2alpha.2-1
+```
+
+The pacman repository only provides the latest version, so when a specific version is specified, the script does not ask whether to add the repository.
+If the repository has already been added, the next `pacman -Syu` will upgrade the specified version to the latest one, unless `deepseek-harness-desktop` is added to `IgnorePkg` in `/etc/pacman.conf`.
+
+The package is not signed, and Arch's default `pacman.conf` requires packages installed via URL to be signed, so the script downloads to a local file first and then installs.
+Please run the script with `bash <(...)`: using `curl ... | bash` would cause pacman's confirmation prompts to read answers from the pipe instead of the terminal.
+
+### Manually adding the pacman repository
 
 Add the following to the end of `/etc/pacman.conf`:
 
@@ -23,33 +45,14 @@ Then install:
 sudo pacman -Syu deepseek-harness-desktop
 ```
 
-After that, both `pacman -Syu` and `paru -Syu` will fetch updates from this repository.
 The packages in the repository are not signed; `SigLevel = Optional TrustAll` accepts unsigned packages only for this repository.
-The repository is simply the release tagged `x86_64`, which only keeps the latest version; older packages are in the releases for their respective versions.
+The repository is the release tagged `x86_64`, which only keeps the latest version; packages for older versions are in the releases for their respective versions.
 
-### Via the install script
-
-To install the latest version:
-
-```sh
-bash <(curl -fsSL https://raw.githubusercontent.com/function2-llx/deepseek-harness-desktop/main/install.sh)
-```
-
-To install a specific version, pass the tag from the [release](https://github.com/function2-llx/deepseek-harness-desktop/releases) as an argument:
-
-```sh
-bash <(curl -fsSL https://raw.githubusercontent.com/function2-llx/deepseek-harness-desktop/main/install.sh) 0.2.2alpha.2-1
-```
-
-[install.sh](install.sh) downloads the package to a temporary directory, installs it with `sudo pacman -U`, and finally removes the temporary directory.
-The package is not signed, and Arch's default `pacman.conf` requires packages installed via URL to be signed, so the script downloads it locally first and then installs it.
-When running the script with `bash <(...)`, pacman's confirmation prompt reads answers from the terminal; `curl ... | bash` would make it read from the pipe.
-
-### Coexistence with paru and other AUR helpers
+### Coexisting with paru and other AUR helpers
 
 paru only compares installed packages that do not belong to any pacman repository against the AUR.
-When installed via the pacman repository, `paru -Syu` updates this package from the repository and will not suggest building it from the AUR.
-When installed via the install script, `paru -Syu` will compare it with the AUR package of the same name and, after the AUR version is updated, suggest building from source; adding the pacman repository above avoids this.
+After adding the pacman repository, `paru -Syu` updates this package from the repository and will not suggest building from the AUR.
+Without the repository added, `paru -Syu` will compare it against the AUR package of the same name and, when the AUR version is newer, suggest building from source; rerun the installation script and agree to add the repository, or add it manually as described in the previous section, to avoid this.
 
 ## Build process
 
